@@ -128,48 +128,6 @@ def init_db() -> None:
         downtime_comments TEXT NOT NULL DEFAULT ''
     );
 
-    CREATE TABLE IF NOT EXISTS machines (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_number TEXT NOT NULL UNIQUE,
-        line TEXT NOT NULL DEFAULT '',
-        serial_number TEXT NOT NULL DEFAULT '',
-        age TEXT NOT NULL DEFAULT '',
-        spindle_connection TEXT NOT NULL DEFAULT '',
-        coolant_type TEXT NOT NULL DEFAULT '',
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS machine_maintenance (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_id INTEGER NOT NULL,
-        issue TEXT NOT NULL DEFAULT '',
-        solution TEXT NOT NULL DEFAULT '',
-        downtime_mins REAL NOT NULL DEFAULT 0.0,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS machine_programs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_id INTEGER NOT NULL,
-        program_name TEXT NOT NULL,
-        revision INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(machine_id, program_name, revision),
-        FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS part_files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        part_id INTEGER NOT NULL,
-        file_name TEXT NOT NULL,
-        revision INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(part_id, file_name, revision),
-        FOREIGN KEY(part_id) REFERENCES parts(id) ON DELETE CASCADE
-    );
-
     CREATE TABLE IF NOT EXISTS tool_entries (
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
@@ -269,7 +227,7 @@ def init_db() -> None:
     """
     with connect() as conn:
         conn.executescript(schema)
-        conn.execute("INSERT OR IGNORE INTO meta(key,value) VALUES('schema_version','2')")
+        conn.execute("INSERT OR IGNORE INTO meta(key,value) VALUES('schema_version','1')")
         _ensure_columns(conn, "tools", {
             "stock_qty": "INTEGER NOT NULL DEFAULT 0",
             "inserts_per_tool": "INTEGER NOT NULL DEFAULT 1",
@@ -277,52 +235,6 @@ def init_db() -> None:
         _ensure_columns(conn, "tool_entries", {
             "tool_life": "REAL NOT NULL DEFAULT 0.0",
         })
-        _ensure_table(conn, "machines", """
-            CREATE TABLE IF NOT EXISTS machines (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                machine_number TEXT NOT NULL UNIQUE,
-                line TEXT NOT NULL DEFAULT '',
-                serial_number TEXT NOT NULL DEFAULT '',
-                age TEXT NOT NULL DEFAULT '',
-                spindle_connection TEXT NOT NULL DEFAULT '',
-                coolant_type TEXT NOT NULL DEFAULT '',
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-            );
-        """)
-        _ensure_table(conn, "machine_maintenance", """
-            CREATE TABLE IF NOT EXISTS machine_maintenance (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                machine_id INTEGER NOT NULL,
-                issue TEXT NOT NULL DEFAULT '',
-                solution TEXT NOT NULL DEFAULT '',
-                downtime_mins REAL NOT NULL DEFAULT 0.0,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "machine_programs", """
-            CREATE TABLE IF NOT EXISTS machine_programs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                machine_id INTEGER NOT NULL,
-                program_name TEXT NOT NULL,
-                revision INTEGER NOT NULL DEFAULT 1,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                UNIQUE(machine_id, program_name, revision),
-                FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "part_files", """
-            CREATE TABLE IF NOT EXISTS part_files (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                part_id INTEGER NOT NULL,
-                file_name TEXT NOT NULL,
-                revision INTEGER NOT NULL DEFAULT 1,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                UNIQUE(part_id, file_name, revision),
-                FOREIGN KEY(part_id) REFERENCES parts(id) ON DELETE CASCADE
-            );
-        """)
 
 
 def _ensure_columns(conn: sqlite3.Connection, table: str, columns: Dict[str, str]) -> None:
@@ -330,16 +242,6 @@ def _ensure_columns(conn: sqlite3.Connection, table: str, columns: Dict[str, str
     for name, col_def in columns.items():
         if name not in existing:
             conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {col_def}")
-
-
-def _ensure_table(conn: sqlite3.Connection, table: str, ddl: str) -> None:
-    row = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-        (table,),
-    ).fetchone()
-    if row:
-        return
-    conn.executescript(ddl)
 
 
 def log_audit(username: str, action: str) -> None:
@@ -397,6 +299,12 @@ def ensure_lines(names: Iterable[str]) -> None:
             n = (n or "").strip()
             if n:
                 conn.execute("INSERT OR IGNORE INTO lines(name) VALUES(?)", (n,))
+
+
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
 
 
 def list_lines() -> List[str]:

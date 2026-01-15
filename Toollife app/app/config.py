@@ -152,6 +152,9 @@ DEFAULT_LINE_TOOL_MAP = {
         "21", "23", "25", "26", "27", "40", "60",
     ] + [str(i) for i in range(201, 216)],
 }
+DEFAULT_TOOL_CONFIG = {}
+DEFAULT_LINES = ["U725", "JL"]
+DEFAULT_DOWNTIME_CODES = []
 
 DEFAULT_DEFECT_CODES = []
 DEFAULT_ANDON_REASONS = []
