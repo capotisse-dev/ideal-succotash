@@ -212,10 +212,7 @@ class ToolChangerUI(tk.Frame):
         info = get_tool(tool_num)
         inserts = list_tool_inserts(tool_num)
         if inserts:
-            base_cost, expected_life = self._calculate_insert_cost(inserts)
-            cost = base_cost
-            if tool_life > 0 and expected_life > 0:
-                cost = base_cost * (expected_life / tool_life)
+            cost = self._calculate_insert_cost(inserts)
         if info:
             if not inserts:
                 cost = safe_float(info.get("unit_cost", 0), 0.0)
@@ -276,8 +273,6 @@ class ToolChangerUI(tk.Frame):
 
     def _calculate_insert_cost(self, inserts):
         total = 0.0
-        life_total = 0.0
-        life_count = 0
         for ins in inserts:
             count = safe_float(ins.get("insert_count", 0), 0.0)
             price = safe_float(ins.get("price_per_insert", 0), 0.0)
@@ -286,7 +281,4 @@ class ToolChangerUI(tk.Frame):
             if life <= 0 or sides <= 0:
                 continue
             total += ((count * price) / life) / sides
-            life_total += life
-            life_count += 1
-        expected_life = (life_total / life_count) if life_count else 0.0
-        return total, expected_life
+        return total

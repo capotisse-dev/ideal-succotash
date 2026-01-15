@@ -8,7 +8,7 @@ from datetime import datetime
 import pandas as pd
 
 from .config import (
-    DATA_DIR, LOGS_DIR, BACKUPS_DIR, MACHINES_DIR, PART_FILES_DIR, CNC_PROGRAMS_DIR, CNC_EXPORTS_DIR,
+    DATA_DIR, LOGS_DIR, BACKUPS_DIR, MACHINES_DIR, PART_FILES_DIR,
     USERS_FILE, REASONS_FILE, PARTS_FILE, TOOL_CONFIG_FILE,
     DEFECT_CODES_FILE, ANDON_REASONS_FILE, COST_CONFIG_FILE, RISK_CONFIG_FILE,
     REPEAT_RULES_FILE, LPA_CHECKLIST_FILE, GAGES_FILE, GAGE_VERIFICATION_Q_FILE,
@@ -28,6 +28,9 @@ from .db import (
     set_meta,
     ensure_lines,
     upsert_downtime_code,
+    list_tools_simple,
+    upsert_tool_inventory,
+    set_tool_lines,
 )
 from .migrate_to_sqlite import run_migration
 
@@ -48,8 +51,6 @@ def _ensure_dirs() -> None:
     os.makedirs(BACKUPS_DIR, exist_ok=True)
     os.makedirs(MACHINES_DIR, exist_ok=True)
     os.makedirs(PART_FILES_DIR, exist_ok=True)
-    os.makedirs(CNC_PROGRAMS_DIR, exist_ok=True)
-    os.makedirs(CNC_EXPORTS_DIR, exist_ok=True)
 
 
 def _ensure_json_files() -> None:
@@ -174,6 +175,104 @@ def _seed_default_tools() -> None:
             set_tool_lines(str(tool_num), [line])
 
 
+def _seed_default_tools() -> None:
+    from .db import list_tools_simple, upsert_tool_inventory, set_tool_lines
+
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
+
+
+def _seed_default_tools() -> None:
+    from .db import list_tools_simple, upsert_tool_inventory, set_tool_lines
+
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
+
+
+def _seed_default_tools() -> None:
+    from .db import list_tools_simple, upsert_tool_inventory, set_tool_lines
+
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
+
+
+def _seed_default_tools() -> None:
+    from .db import list_tools_simple, upsert_tool_inventory, set_tool_lines
+
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
+
+
+def _seed_default_tools() -> None:
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
+
+
+def _seed_default_tools() -> None:
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
+
+
 # ----------------------------
 # Public entry point
 # ----------------------------
@@ -183,6 +282,20 @@ def ensure_app_initialized() -> None:
     """
     _ensure_dirs()
 
+    # SQLite (new system of record)
+    init_db()
+    seed_default_users(DEFAULT_USERS)
+    ensure_lines(DEFAULT_LINES)
+    for code in DEFAULT_DOWNTIME_CODES:
+        upsert_downtime_code(code)
+    if get_meta("json_migrated") != "1":
+        run_migration()
+        set_meta("json_migrated", "1")
+    _seed_default_tools()
+
+    # Legacy files still used elsewhere in the app (for now)
+    _ensure_json_files()
+    _ensure_default_users()
     # SQLite (new system of record)
     init_db()
     seed_default_users(DEFAULT_USERS)

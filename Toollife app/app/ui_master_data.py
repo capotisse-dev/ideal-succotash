@@ -24,9 +24,6 @@ from .db import (
     deactivate_part,
     set_scrap_cost,
     get_scrap_costs_simple,
-    add_part_file,
-    list_part_files,
-    next_part_file_revision,
     list_downtime_codes,
     upsert_downtime_code,
     deactivate_downtime_code,
@@ -233,7 +230,7 @@ class MasterDataUI(tk.Frame):
         calc_lbl.grid(row=5, column=0, columnspan=4, sticky="w", pady=(8, 0))
 
         def recalc_cost():
-            cost, _ = self._calculate_insert_cost(self._collect_insert_data(insert_tabs))
+            cost = self._calculate_insert_cost(self._collect_insert_data(insert_tabs))
             calc_lbl.config(text=f"Calculated change cost: ${cost:,.4f}")
 
         tk.Button(form, text="Recalculate Cost", command=recalc_cost).grid(row=6, column=0, pady=8, sticky="w")
@@ -314,8 +311,6 @@ class MasterDataUI(tk.Frame):
 
     def _calculate_insert_cost(self, inserts):
         total = 0.0
-        life_total = 0.0
-        life_count = 0
         for ins in inserts:
             count = safe_float(ins.get("insert_count", 0), 0.0)
             price = safe_float(ins.get("price_per_insert", 0), 0.0)
@@ -324,10 +319,7 @@ class MasterDataUI(tk.Frame):
             if life <= 0 or sides <= 0:
                 continue
             total += ((count * price) / life) / sides
-            life_total += life
-            life_count += 1
-        expected_life = (life_total / life_count) if life_count else 0.0
-        return total, expected_life
+        return total
 
     # -------------------- PARTS & LINES --------------------
     def _build_parts(self, parent):
@@ -420,47 +412,6 @@ class MasterDataUI(tk.Frame):
             line_vars[line] = var
             tk.Checkbutton(line_frame, text=line, variable=var).grid(row=0, column=idx, sticky="w", padx=6)
 
-        files_frame = tk.LabelFrame(form, text="Part Files (PDF Revisions)", padx=8, pady=8)
-        files_frame.grid(row=3, column=0, columnspan=2, sticky="we", pady=10)
-        files_list = tk.Listbox(files_frame, height=6, width=56)
-        files_list.pack(fill="x")
-
-        def refresh_files():
-            files_list.delete(0, "end")
-            part_id = existing.get("id")
-            if not part_id:
-                return
-            for row in list_part_files(part_id):
-                files_list.insert("end", f"{row.get('file_name', '')} | rev {row.get('revision', 1)}")
-
-        def add_file():
-            pn = part_var.get().strip()
-            part_id = existing.get("id")
-            if not pn or not part_id:
-                messagebox.showerror("Error", "Save the part before uploading files.")
-                return
-            file_path = filedialog.askopenfilename(
-                title="Select PDF",
-                filetypes=[("PDF Files", "*.pdf")],
-            )
-            if not file_path:
-                return
-            base_name = os.path.splitext(os.path.basename(file_path))[0]
-            revision = next_part_file_revision(part_id, base_name)
-            add_part_file(part_id, base_name, revision)
-            dest_dir = os.path.join(
-                PART_FILES_DIR,
-                pn,
-                "files",
-                base_name,
-                f"rev{revision}",
-            )
-            os.makedirs(dest_dir, exist_ok=True)
-            shutil.copy2(file_path, os.path.join(dest_dir, os.path.basename(file_path)))
-            refresh_files()
-
-        tk.Button(files_frame, text="Add PDF Revision", command=add_file).pack(anchor="e", pady=6)
-
         def save():
             pn = part_var.get().strip()
             if not pn:
@@ -471,12 +422,9 @@ class MasterDataUI(tk.Frame):
             upsert_part(pn, name=name, lines=lines)
             log_audit(self.controller.user, f"Updated part {pn} lines/pricing")
             self.refresh_parts()
-            existing.update({"id": next((p.get("id") for p in list_parts_with_lines() if p.get("part_number") == pn), None)})
-            refresh_files()
             top.destroy()
 
-        tk.Button(form, text="Save Part", command=save, bg="#28a745", fg="white").grid(row=4, column=1, sticky="e", pady=10)
-        refresh_files()
+        tk.Button(form, text="Save Part", command=save, bg="#28a745", fg="white").grid(row=3, column=1, sticky="e", pady=10)
 
     def delete_selected_part(self):
         sel = self.part_tree.selection()
