@@ -30,7 +30,7 @@ class DashboardUI(tk.Frame):
 
         tk.Label(
             top,
-            text="Dashboard (Pareto + Trends)",
+            text="On Shift Pass Down (Pareto + Trends)",
             bg=controller.colors["bg"],
             fg=controller.colors["fg"],
             font=("Arial", 16, "bold")
