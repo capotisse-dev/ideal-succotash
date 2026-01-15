@@ -8,7 +8,7 @@ from datetime import datetime
 import pandas as pd
 
 from .config import (
-    DATA_DIR, LOGS_DIR, BACKUPS_DIR,
+    DATA_DIR, LOGS_DIR, BACKUPS_DIR, MACHINES_DIR, PART_FILES_DIR,
     USERS_FILE, REASONS_FILE, PARTS_FILE, TOOL_CONFIG_FILE,
     DEFECT_CODES_FILE, ANDON_REASONS_FILE, COST_CONFIG_FILE, RISK_CONFIG_FILE,
     REPEAT_RULES_FILE, LPA_CHECKLIST_FILE, GAGES_FILE, GAGE_VERIFICATION_Q_FILE,
@@ -49,6 +49,8 @@ def _ensure_dirs() -> None:
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(LOGS_DIR, exist_ok=True)
     os.makedirs(BACKUPS_DIR, exist_ok=True)
+    os.makedirs(MACHINES_DIR, exist_ok=True)
+    os.makedirs(PART_FILES_DIR, exist_ok=True)
 
 
 def _ensure_json_files() -> None:
@@ -154,6 +156,23 @@ def _ensure_gage_verification_log(xlsx_path: str) -> None:
         "Verified_By",
     ]
     pd.DataFrame(columns=cols).to_excel(xlsx_path, index=False)
+
+
+def _seed_default_tools() -> None:
+    from .db import list_tools_simple, upsert_tool_inventory, set_tool_lines
+
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
 
 
 def _seed_default_tools() -> None:

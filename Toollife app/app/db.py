@@ -634,6 +634,168 @@ def list_tools_simple():
         return [dict(r) for r in rows]
 
 
+def list_machines() -> List[Dict[str, Any]]:
+    with connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT id, machine_number, line, serial_number, age, spindle_connection, coolant_type
+            FROM machines
+            ORDER BY machine_number
+            """
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def upsert_machine(
+    machine_number: str,
+    *,
+    line: str = "",
+    serial_number: str = "",
+    age: str = "",
+    spindle_connection: str = "",
+    coolant_type: str = "",
+) -> None:
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO machines(
+                machine_number, line, serial_number, age, spindle_connection, coolant_type
+            )
+            VALUES(?,?,?,?,?,?)
+            ON CONFLICT(machine_number) DO UPDATE SET
+              line=excluded.line,
+              serial_number=excluded.serial_number,
+              age=excluded.age,
+              spindle_connection=excluded.spindle_connection,
+              coolant_type=excluded.coolant_type,
+              updated_at=datetime('now')
+            """,
+            (machine_number, line, serial_number, age, spindle_connection, coolant_type),
+        )
+
+
+def get_machine(machine_number: str) -> Optional[Dict[str, Any]]:
+    with connect() as conn:
+        row = conn.execute(
+            """
+            SELECT id, machine_number, line, serial_number, age, spindle_connection, coolant_type
+            FROM machines
+            WHERE machine_number=?
+            """,
+            (machine_number,),
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def list_machine_maintenance(machine_id: int) -> List[Dict[str, Any]]:
+    with connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT id, issue, solution, downtime_mins, created_at
+            FROM machine_maintenance
+            WHERE machine_id=?
+            ORDER BY created_at DESC, id DESC
+            """,
+            (int(machine_id),),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def add_machine_maintenance(
+    machine_id: int,
+    *,
+    issue: str = "",
+    solution: str = "",
+    downtime_mins: float = 0.0,
+) -> None:
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO machine_maintenance(machine_id, issue, solution, downtime_mins)
+            VALUES(?,?,?,?)
+            """,
+            (int(machine_id), issue, solution, float(downtime_mins)),
+        )
+
+
+def list_machine_programs(machine_id: int) -> List[Dict[str, Any]]:
+    with connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT program_name, revision, created_at
+            FROM machine_programs
+            WHERE machine_id=?
+            ORDER BY program_name, revision DESC
+            """,
+            (int(machine_id),),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def add_machine_program(machine_id: int, program_name: str, revision: int) -> None:
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO machine_programs(machine_id, program_name, revision)
+            VALUES(?,?,?)
+            """,
+            (int(machine_id), program_name, int(revision)),
+        )
+
+
+def next_machine_program_revision(machine_id: int, program_name: str) -> int:
+    with connect() as conn:
+        row = conn.execute(
+            """
+            SELECT MAX(revision) AS rev
+            FROM machine_programs
+            WHERE machine_id=? AND program_name=?
+            """,
+            (int(machine_id), program_name),
+        ).fetchone()
+        current = row["rev"] if row and row["rev"] is not None else 0
+        return int(current) + 1
+
+
+def list_part_files(part_id: int) -> List[Dict[str, Any]]:
+    with connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT file_name, revision, created_at
+            FROM part_files
+            WHERE part_id=?
+            ORDER BY file_name, revision DESC
+            """,
+            (int(part_id),),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def add_part_file(part_id: int, file_name: str, revision: int) -> None:
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO part_files(part_id, file_name, revision)
+            VALUES(?,?,?)
+            """,
+            (int(part_id), file_name, int(revision)),
+        )
+
+
+def next_part_file_revision(part_id: int, file_name: str) -> int:
+    with connect() as conn:
+        row = conn.execute(
+            """
+            SELECT MAX(revision) AS rev
+            FROM part_files
+            WHERE part_id=? AND file_name=?
+            """,
+            (int(part_id), file_name),
+        ).fetchone()
+        current = row["rev"] if row and row["rev"] is not None else 0
+        return int(current) + 1
+
+
 def get_scrap_costs_simple():
     with connect() as conn:
         rows = conn.execute(

@@ -1,8 +1,10 @@
 # app/ui_master_data.py
 from __future__ import annotations
 
+import os
+import shutil
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 
 from .storage import safe_float, safe_int
 from .db import (
@@ -26,6 +28,7 @@ from .db import (
     upsert_downtime_code,
     deactivate_downtime_code,
 )
+from .config import PART_FILES_DIR
 from .audit import log_audit
 
 

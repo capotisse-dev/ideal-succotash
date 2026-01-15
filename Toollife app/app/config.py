@@ -15,6 +15,8 @@ DATA_DIR = str(PROJECT_ROOT / "data")
 LOGS_DIR = str(PROJECT_ROOT / "logs")
 LOG_DIR = LOGS_DIR  # compat alias
 BACKUPS_DIR = str(PROJECT_ROOT / "backups")
+MACHINES_DIR = str(PROJECT_ROOT / "data" / "machines")
+PART_FILES_DIR = str(PROJECT_ROOT / "data" / "parts")
 
 # Logs
 AUDIT_LOG_FILE = str(Path(LOGS_DIR) / "audit.log")
