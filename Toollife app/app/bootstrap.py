@@ -18,10 +18,10 @@ from .config import (
     DEFAULT_USERS, DEFAULT_REASONS, DEFAULT_PARTS, DEFAULT_TOOL_CONFIG,
     DEFAULT_DEFECT_CODES, DEFAULT_ANDON_REASONS, DEFAULT_COST_CONFIG, DEFAULT_RISK_CONFIG,
     DEFAULT_REPEAT_RULES, DEFAULT_LPA_CHECKLIST, DEFAULT_GAGES, DEFAULT_GAGE_VERIFICATION_Q,
-    DEFAULT_NCRS, DEFAULT_ACTIONS
+    DEFAULT_NCRS, DEFAULT_ACTIONS, DEFAULT_LINES, DEFAULT_DOWNTIME_CODES
 )
 
-from .db import init_db, seed_default_users, get_meta, set_meta
+from .db import init_db, seed_default_users, get_meta, set_meta, ensure_lines, upsert_downtime_code
 from .migrate_to_sqlite import run_migration
 
 
@@ -158,6 +158,9 @@ def ensure_app_initialized() -> None:
     # SQLite (new system of record)
     init_db()
     seed_default_users(DEFAULT_USERS)
+    ensure_lines(DEFAULT_LINES)
+    for code in DEFAULT_DOWNTIME_CODES:
+        upsert_downtime_code(code)
     if get_meta("json_migrated") != "1":
         run_migration()
         set_meta("json_migrated", "1")
