@@ -78,6 +78,56 @@ def init_db() -> None:
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    CREATE TABLE IF NOT EXISTS tool_lines (
+        tool_id INTEGER NOT NULL,
+        line_id INTEGER NOT NULL,
+        PRIMARY KEY(tool_id, line_id),
+        FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE,
+        FOREIGN KEY(line_id) REFERENCES lines(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS tool_parts (
+        tool_id INTEGER NOT NULL,
+        part_id INTEGER NOT NULL,
+        PRIMARY KEY(tool_id, part_id),
+        FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE,
+        FOREIGN KEY(part_id) REFERENCES parts(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS tool_inserts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tool_id INTEGER NOT NULL,
+        insert_name TEXT NOT NULL DEFAULT '',
+        insert_count INTEGER NOT NULL DEFAULT 0,
+        price_per_insert REAL NOT NULL DEFAULT 0.0,
+        sides_per_insert INTEGER NOT NULL DEFAULT 1,
+        tool_life REAL NOT NULL DEFAULT 0.0,
+        FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS downtime_codes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL UNIQUE,
+        description TEXT NOT NULL DEFAULT '',
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS operator_entries (
+        id TEXT PRIMARY KEY,
+        date TEXT NOT NULL,
+        time TEXT NOT NULL,
+        username TEXT NOT NULL DEFAULT '',
+        line TEXT NOT NULL DEFAULT '',
+        cell_ran TEXT NOT NULL DEFAULT '',
+        parts_ran TEXT NOT NULL DEFAULT '',
+        downtime_code TEXT NOT NULL DEFAULT '',
+        downtime_total_time REAL NOT NULL DEFAULT 0.0,
+        downtime_occurrences INTEGER NOT NULL DEFAULT 0,
+        downtime_comments TEXT NOT NULL DEFAULT ''
+    );
+
     CREATE TABLE IF NOT EXISTS tool_entries (
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
@@ -251,6 +301,12 @@ def ensure_lines(names: Iterable[str]) -> None:
                 conn.execute("INSERT OR IGNORE INTO lines(name) VALUES(?)", (n,))
 
 
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
+
+
 def upsert_part(part_number: str, name: str = "", lines: Optional[List[str]] = None) -> None:
     lines = lines or []
     with connect() as conn:
@@ -358,6 +414,170 @@ def deactivate_tool(tool_num: str) -> None:
         )
 
 
+def _tool_id(conn: sqlite3.Connection, tool_num: str) -> Optional[int]:
+    row = conn.execute(
+        "SELECT id FROM tools WHERE tool_num=?",
+        (tool_num,),
+    ).fetchone()
+    return row["id"] if row else None
+
+
+def _part_id(conn: sqlite3.Connection, part_number: str) -> Optional[int]:
+    row = conn.execute(
+        "SELECT id FROM parts WHERE part_number=?",
+        (part_number,),
+    ).fetchone()
+    return row["id"] if row else None
+
+
+def set_tool_lines(tool_num: str, lines: Iterable[str]) -> None:
+    lines = [ln.strip() for ln in lines if (ln or "").strip()]
+    with connect() as conn:
+        tool_id = _tool_id(conn, tool_num)
+        if not tool_id:
+            return
+        conn.execute("DELETE FROM tool_lines WHERE tool_id=?", (tool_id,))
+        for ln in lines:
+            conn.execute("INSERT OR IGNORE INTO lines(name) VALUES(?)", (ln,))
+            line_id = conn.execute("SELECT id FROM lines WHERE name=?", (ln,)).fetchone()["id"]
+            conn.execute("INSERT OR IGNORE INTO tool_lines(tool_id,line_id) VALUES(?,?)", (tool_id, line_id))
+
+
+def get_tool_lines(tool_num: str) -> List[str]:
+    with connect() as conn:
+        tool_id = _tool_id(conn, tool_num)
+        if not tool_id:
+            return []
+        rows = conn.execute(
+            """
+            SELECT l.name
+            FROM tool_lines tl
+            JOIN lines l ON l.id = tl.line_id
+            WHERE tl.tool_id=?
+            ORDER BY l.name
+            """,
+            (tool_id,),
+        ).fetchall()
+        return [r["name"] for r in rows]
+
+
+def set_tool_parts(tool_num: str, parts: Iterable[str]) -> None:
+    parts = [pn.strip() for pn in parts if (pn or "").strip()]
+    with connect() as conn:
+        tool_id = _tool_id(conn, tool_num)
+        if not tool_id:
+            return
+        conn.execute("DELETE FROM tool_parts WHERE tool_id=?", (tool_id,))
+        for pn in parts:
+            part_id = _part_id(conn, pn)
+            if not part_id:
+                conn.execute(
+                    "INSERT INTO parts(part_number, name, is_active) VALUES(?, '', 1)",
+                    (pn,),
+                )
+                part_id = _part_id(conn, pn)
+            if part_id:
+                conn.execute("INSERT OR IGNORE INTO tool_parts(tool_id,part_id) VALUES(?,?)", (tool_id, part_id))
+
+
+def get_tool_parts(tool_num: str) -> List[str]:
+    with connect() as conn:
+        tool_id = _tool_id(conn, tool_num)
+        if not tool_id:
+            return []
+        rows = conn.execute(
+            """
+            SELECT p.part_number
+            FROM tool_parts tp
+            JOIN parts p ON p.id = tp.part_id
+            WHERE tp.tool_id=?
+            ORDER BY p.part_number
+            """,
+            (tool_id,),
+        ).fetchall()
+        return [r["part_number"] for r in rows]
+
+
+def replace_tool_inserts(tool_num: str, inserts: Iterable[Dict[str, Any]]) -> None:
+    with connect() as conn:
+        tool_id = _tool_id(conn, tool_num)
+        if not tool_id:
+            return
+        conn.execute("DELETE FROM tool_inserts WHERE tool_id=?", (tool_id,))
+        for ins in inserts:
+            conn.execute(
+                """
+                INSERT INTO tool_inserts(
+                    tool_id, insert_name, insert_count, price_per_insert, sides_per_insert, tool_life
+                )
+                VALUES(?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    tool_id,
+                    str(ins.get("insert_name", "") or ""),
+                    int(ins.get("insert_count", 0) or 0),
+                    float(ins.get("price_per_insert", 0.0) or 0.0),
+                    int(ins.get("sides_per_insert", 1) or 1),
+                    float(ins.get("tool_life", 0.0) or 0.0),
+                ),
+            )
+
+
+def list_tool_inserts(tool_num: str) -> List[Dict[str, Any]]:
+    with connect() as conn:
+        tool_id = _tool_id(conn, tool_num)
+        if not tool_id:
+            return []
+        rows = conn.execute(
+            """
+            SELECT insert_name, insert_count, price_per_insert, sides_per_insert, tool_life
+            FROM tool_inserts
+            WHERE tool_id=?
+            ORDER BY id
+            """,
+            (tool_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def list_tools_for_line(line: str, *, include_unassigned: bool = False) -> List[str]:
+    with connect() as conn:
+        if not line or line.lower() == "all":
+            rows = conn.execute(
+                "SELECT tool_num FROM tools WHERE is_active=1 ORDER BY tool_num"
+            ).fetchall()
+            return [r["tool_num"] for r in rows]
+        line_row = conn.execute("SELECT id FROM lines WHERE name=?", (line,)).fetchone()
+        if not line_row:
+            return []
+        line_id = line_row["id"]
+        if include_unassigned:
+            rows = conn.execute(
+                """
+                SELECT t.tool_num
+                FROM tools t
+                LEFT JOIN tool_lines tl ON tl.tool_id = t.id
+                WHERE t.is_active=1
+                  AND (tl.line_id=? OR tl.line_id IS NULL)
+                GROUP BY t.tool_num
+                ORDER BY t.tool_num
+                """,
+                (line_id,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT t.tool_num
+                FROM tools t
+                JOIN tool_lines tl ON tl.tool_id = t.id
+                WHERE t.is_active=1 AND tl.line_id=?
+                ORDER BY t.tool_num
+                """,
+                (line_id,),
+            ).fetchall()
+        return [r["tool_num"] for r in rows]
+
+
 def set_scrap_cost(part_number: str, scrap_cost: float) -> None:
     with connect() as conn:
         row = conn.execute("SELECT id FROM parts WHERE part_number=?", (part_number,)).fetchone()
@@ -425,6 +645,97 @@ def get_scrap_costs_simple():
             """
         ).fetchall()
         return {r["part_number"]: float(r["scrap_cost"]) for r in rows}
+
+
+def list_downtime_codes(active_only: bool = True) -> List[Dict[str, Any]]:
+    with connect() as conn:
+        if active_only:
+            rows = conn.execute(
+                "SELECT code, description FROM downtime_codes WHERE is_active=1 ORDER BY code"
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT code, description, is_active FROM downtime_codes ORDER BY code"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def upsert_downtime_code(code: str, description: str = "") -> None:
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO downtime_codes(code, description, is_active)
+            VALUES(?, ?, 1)
+            ON CONFLICT(code) DO UPDATE SET
+              description=excluded.description,
+              is_active=1,
+              updated_at=datetime('now')
+            """,
+            (code, description),
+        )
+
+
+def deactivate_downtime_code(code: str) -> None:
+    with connect() as conn:
+        conn.execute(
+            "UPDATE downtime_codes SET is_active=0, updated_at=datetime('now') WHERE code=?",
+            (code,),
+        )
+
+
+def upsert_operator_entry(entry: Dict[str, Any]) -> None:
+    if not entry.get("id"):
+        raise ValueError("Entry must include id")
+    with connect() as conn:
+        existing = conn.execute(
+            "SELECT id FROM operator_entries WHERE id=?",
+            (entry["id"],),
+        ).fetchone()
+        if existing:
+            conn.execute(
+                """
+                UPDATE operator_entries
+                SET date=?, time=?, username=?, line=?, cell_ran=?, parts_ran=?,
+                    downtime_code=?, downtime_total_time=?, downtime_occurrences=?, downtime_comments=?
+                WHERE id=?
+                """,
+                (
+                    entry.get("date", ""),
+                    entry.get("time", ""),
+                    entry.get("username", ""),
+                    entry.get("line", ""),
+                    entry.get("cell_ran", ""),
+                    entry.get("parts_ran", ""),
+                    entry.get("downtime_code", ""),
+                    float(entry.get("downtime_total_time", 0.0) or 0.0),
+                    int(entry.get("downtime_occurrences", 0) or 0),
+                    entry.get("downtime_comments", ""),
+                    entry["id"],
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                INSERT INTO operator_entries(
+                    id, date, time, username, line, cell_ran, parts_ran,
+                    downtime_code, downtime_total_time, downtime_occurrences, downtime_comments
+                )
+                VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    entry["id"],
+                    entry.get("date", ""),
+                    entry.get("time", ""),
+                    entry.get("username", ""),
+                    entry.get("line", ""),
+                    entry.get("cell_ran", ""),
+                    entry.get("parts_ran", ""),
+                    entry.get("downtime_code", ""),
+                    float(entry.get("downtime_total_time", 0.0) or 0.0),
+                    int(entry.get("downtime_occurrences", 0) or 0),
+                    entry.get("downtime_comments", ""),
+                ),
+            )
 
 
 def upsert_user(
