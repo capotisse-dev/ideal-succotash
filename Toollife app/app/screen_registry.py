@@ -8,6 +8,7 @@ SCREEN_REGISTRY: Dict[str, Tuple[str, str]] = {
     "Notifications": ("app.ui_notifications", "NotificationsUI"),
     "Action Center": ("app.ui_action_center", "ActionCenterUI"),
     "Tool Changer": ("app.ui_toolchanger", "ToolChangerUI"),
+    "Operator": ("app.ui_operator", "OperatorUI"),
     "Leader": ("app.ui_leader", "LeaderUI"),
     "Quality": ("app.ui_quality", "QualityUI"),
     "Gages": ("app.ui_gages", "GagesUI"),
