@@ -128,48 +128,6 @@ def init_db() -> None:
         downtime_comments TEXT NOT NULL DEFAULT ''
     );
 
-    CREATE TABLE IF NOT EXISTS machines (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_number TEXT NOT NULL UNIQUE,
-        line TEXT NOT NULL DEFAULT '',
-        serial_number TEXT NOT NULL DEFAULT '',
-        age TEXT NOT NULL DEFAULT '',
-        spindle_connection TEXT NOT NULL DEFAULT '',
-        coolant_type TEXT NOT NULL DEFAULT '',
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS machine_maintenance (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_id INTEGER NOT NULL,
-        issue TEXT NOT NULL DEFAULT '',
-        solution TEXT NOT NULL DEFAULT '',
-        downtime_mins REAL NOT NULL DEFAULT 0.0,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS machine_programs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_id INTEGER NOT NULL,
-        program_name TEXT NOT NULL,
-        revision INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(machine_id, program_name, revision),
-        FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS part_files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        part_id INTEGER NOT NULL,
-        file_name TEXT NOT NULL,
-        revision INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(part_id, file_name, revision),
-        FOREIGN KEY(part_id) REFERENCES parts(id) ON DELETE CASCADE
-    );
-
     CREATE TABLE IF NOT EXISTS tool_entries (
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
