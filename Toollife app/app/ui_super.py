@@ -112,6 +112,11 @@ class SuperUI(tk.Frame):
             "Tool Changer screen missing",
             "Expected: app/ui_toolchanger.py → class ToolChangerUI",
         )
+        OperatorUI = _safe_view(
+            lambda: __import__("app.ui_operator", fromlist=["OperatorUI"]).OperatorUI,
+            "Operator screen missing",
+            "Expected: app/ui_operator.py → class OperatorUI",
+        )
         ActionCenterUI = _safe_view(
             lambda: __import__("app.ui_action_center", fromlist=["ActionCenterUI"]).ActionCenterUI,
             "Action Center screen missing",
@@ -155,12 +160,13 @@ class SuperUI(tk.Frame):
 
         # ---- Tabs (Super gets everything) ----
         tabs = [
-            ("Dashboard", DashboardUI),
+            ("On Shift Pass Down", DashboardUI),
             ("Notifications", NotificationsUI),
             ("Action Center", ActionCenterUI),
             ("Audit Trail", AuditTrailUI),
 
             ("Tool Changer", ToolChangerUI),
+            ("Operator", OperatorUI),
             ("Leader", LeaderUI),
             ("Quality", QualityUI),
 
