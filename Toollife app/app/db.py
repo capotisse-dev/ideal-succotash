@@ -128,97 +128,6 @@ def init_db() -> None:
         downtime_comments TEXT NOT NULL DEFAULT ''
     );
 
-    CREATE TABLE IF NOT EXISTS machines (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_number TEXT NOT NULL UNIQUE,
-        line TEXT NOT NULL DEFAULT '',
-        serial_number TEXT NOT NULL DEFAULT '',
-        age TEXT NOT NULL DEFAULT '',
-        spindle_connection TEXT NOT NULL DEFAULT '',
-        coolant_type TEXT NOT NULL DEFAULT '',
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS machine_maintenance (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_id INTEGER NOT NULL,
-        issue TEXT NOT NULL DEFAULT '',
-        solution TEXT NOT NULL DEFAULT '',
-        downtime_mins REAL NOT NULL DEFAULT 0.0,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS machine_programs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        machine_id INTEGER NOT NULL,
-        program_name TEXT NOT NULL,
-        revision INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(machine_id, program_name, revision),
-        FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS part_files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        part_id INTEGER NOT NULL,
-        file_name TEXT NOT NULL,
-        revision INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(part_id, file_name, revision),
-        FOREIGN KEY(part_id) REFERENCES parts(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS cnc_programs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        program_name TEXT NOT NULL UNIQUE,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS cnc_program_revisions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        program_id INTEGER NOT NULL,
-        revision INTEGER NOT NULL DEFAULT 1,
-        file_path TEXT NOT NULL,
-        file_hash TEXT NOT NULL,
-        imported_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(program_id, revision),
-        FOREIGN KEY(program_id) REFERENCES cnc_programs(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS cnc_code_catalog (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        program_revision_id INTEGER NOT NULL,
-        code TEXT NOT NULL,
-        code_type TEXT NOT NULL,
-        count INTEGER NOT NULL DEFAULT 0,
-        sample_line INTEGER NOT NULL DEFAULT 0,
-        UNIQUE(program_revision_id, code, code_type),
-        FOREIGN KEY(program_revision_id) REFERENCES cnc_program_revisions(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS cnc_analysis_runs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        program_revision_id INTEGER NOT NULL,
-        machine_profile TEXT NOT NULL DEFAULT '',
-        efficiency_score REAL NOT NULL DEFAULT 0.0,
-        cycle_time_seconds REAL NOT NULL DEFAULT 0.0,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        FOREIGN KEY(program_revision_id) REFERENCES cnc_program_revisions(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS cnc_findings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        analysis_run_id INTEGER NOT NULL,
-        severity TEXT NOT NULL DEFAULT 'INFO',
-        rule_id TEXT NOT NULL DEFAULT '',
-        line_numbers TEXT NOT NULL DEFAULT '',
-        message TEXT NOT NULL DEFAULT '',
-        impact_seconds REAL NOT NULL DEFAULT 0.0,
-        FOREIGN KEY(analysis_run_id) REFERENCES cnc_analysis_runs(id) ON DELETE CASCADE
-    );
-
     CREATE TABLE IF NOT EXISTS tool_entries (
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
@@ -318,7 +227,7 @@ def init_db() -> None:
     """
     with connect() as conn:
         conn.executescript(schema)
-        conn.execute("INSERT OR IGNORE INTO meta(key,value) VALUES('schema_version','2')")
+        conn.execute("INSERT OR IGNORE INTO meta(key,value) VALUES('schema_version','1')")
         _ensure_columns(conn, "tools", {
             "stock_qty": "INTEGER NOT NULL DEFAULT 0",
             "inserts_per_tool": "INTEGER NOT NULL DEFAULT 1",
@@ -326,106 +235,6 @@ def init_db() -> None:
         _ensure_columns(conn, "tool_entries", {
             "tool_life": "REAL NOT NULL DEFAULT 0.0",
         })
-        _ensure_table(conn, "machines", """
-            CREATE TABLE IF NOT EXISTS machines (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                machine_number TEXT NOT NULL UNIQUE,
-                line TEXT NOT NULL DEFAULT '',
-                serial_number TEXT NOT NULL DEFAULT '',
-                age TEXT NOT NULL DEFAULT '',
-                spindle_connection TEXT NOT NULL DEFAULT '',
-                coolant_type TEXT NOT NULL DEFAULT '',
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-            );
-        """)
-        _ensure_table(conn, "machine_maintenance", """
-            CREATE TABLE IF NOT EXISTS machine_maintenance (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                machine_id INTEGER NOT NULL,
-                issue TEXT NOT NULL DEFAULT '',
-                solution TEXT NOT NULL DEFAULT '',
-                downtime_mins REAL NOT NULL DEFAULT 0.0,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "machine_programs", """
-            CREATE TABLE IF NOT EXISTS machine_programs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                machine_id INTEGER NOT NULL,
-                program_name TEXT NOT NULL,
-                revision INTEGER NOT NULL DEFAULT 1,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                UNIQUE(machine_id, program_name, revision),
-                FOREIGN KEY(machine_id) REFERENCES machines(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "part_files", """
-            CREATE TABLE IF NOT EXISTS part_files (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                part_id INTEGER NOT NULL,
-                file_name TEXT NOT NULL,
-                revision INTEGER NOT NULL DEFAULT 1,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                UNIQUE(part_id, file_name, revision),
-                FOREIGN KEY(part_id) REFERENCES parts(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "cnc_programs", """
-            CREATE TABLE IF NOT EXISTS cnc_programs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                program_name TEXT NOT NULL UNIQUE,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
-            );
-        """)
-        _ensure_table(conn, "cnc_program_revisions", """
-            CREATE TABLE IF NOT EXISTS cnc_program_revisions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                program_id INTEGER NOT NULL,
-                revision INTEGER NOT NULL DEFAULT 1,
-                file_path TEXT NOT NULL,
-                file_hash TEXT NOT NULL,
-                imported_at TEXT NOT NULL DEFAULT (datetime('now')),
-                UNIQUE(program_id, revision),
-                FOREIGN KEY(program_id) REFERENCES cnc_programs(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "cnc_code_catalog", """
-            CREATE TABLE IF NOT EXISTS cnc_code_catalog (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                program_revision_id INTEGER NOT NULL,
-                code TEXT NOT NULL,
-                code_type TEXT NOT NULL,
-                count INTEGER NOT NULL DEFAULT 0,
-                sample_line INTEGER NOT NULL DEFAULT 0,
-                UNIQUE(program_revision_id, code, code_type),
-                FOREIGN KEY(program_revision_id) REFERENCES cnc_program_revisions(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "cnc_analysis_runs", """
-            CREATE TABLE IF NOT EXISTS cnc_analysis_runs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                program_revision_id INTEGER NOT NULL,
-                machine_profile TEXT NOT NULL DEFAULT '',
-                efficiency_score REAL NOT NULL DEFAULT 0.0,
-                cycle_time_seconds REAL NOT NULL DEFAULT 0.0,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                FOREIGN KEY(program_revision_id) REFERENCES cnc_program_revisions(id) ON DELETE CASCADE
-            );
-        """)
-        _ensure_table(conn, "cnc_findings", """
-            CREATE TABLE IF NOT EXISTS cnc_findings (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                analysis_run_id INTEGER NOT NULL,
-                severity TEXT NOT NULL DEFAULT 'INFO',
-                rule_id TEXT NOT NULL DEFAULT '',
-                line_numbers TEXT NOT NULL DEFAULT '',
-                message TEXT NOT NULL DEFAULT '',
-                impact_seconds REAL NOT NULL DEFAULT 0.0,
-                FOREIGN KEY(analysis_run_id) REFERENCES cnc_analysis_runs(id) ON DELETE CASCADE
-            );
-        """)
 
 
 def _ensure_columns(conn: sqlite3.Connection, table: str, columns: Dict[str, str]) -> None:
@@ -433,16 +242,6 @@ def _ensure_columns(conn: sqlite3.Connection, table: str, columns: Dict[str, str
     for name, col_def in columns.items():
         if name not in existing:
             conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {col_def}")
-
-
-def _ensure_table(conn: sqlite3.Connection, table: str, ddl: str) -> None:
-    row = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-        (table,),
-    ).fetchone()
-    if row:
-        return
-    conn.executescript(ddl)
 
 
 def log_audit(username: str, action: str) -> None:
@@ -500,6 +299,36 @@ def ensure_lines(names: Iterable[str]) -> None:
             n = (n or "").strip()
             if n:
                 conn.execute("INSERT OR IGNORE INTO lines(name) VALUES(?)", (n,))
+
+
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
+
+
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
+
+
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
+
+
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
+
+
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
 
 
 def list_lines() -> List[str]:
@@ -1020,221 +849,6 @@ def list_downtime_codes(active_only: bool = True) -> List[Dict[str, Any]]:
             rows = conn.execute(
                 "SELECT code, description, is_active FROM downtime_codes ORDER BY code"
             ).fetchall()
-        return [dict(r) for r in rows]
-
-
-def list_cnc_programs() -> List[Dict[str, Any]]:
-    with connect() as conn:
-        rows = conn.execute(
-            "SELECT id, program_name, created_at FROM cnc_programs ORDER BY program_name"
-        ).fetchall()
-        return [dict(r) for r in rows]
-
-
-def get_cnc_program(program_name: str) -> Optional[Dict[str, Any]]:
-    with connect() as conn:
-        row = conn.execute(
-            "SELECT id, program_name FROM cnc_programs WHERE program_name=?",
-            (program_name,),
-        ).fetchone()
-        return dict(row) if row else None
-
-
-def upsert_cnc_program(program_name: str) -> int:
-    with connect() as conn:
-        conn.execute(
-            "INSERT OR IGNORE INTO cnc_programs(program_name) VALUES(?)",
-            (program_name,),
-        )
-        row = conn.execute(
-            "SELECT id FROM cnc_programs WHERE program_name=?",
-            (program_name,),
-        ).fetchone()
-        return int(row["id"]) if row else 0
-
-
-def list_cnc_program_revisions(program_id: int) -> List[Dict[str, Any]]:
-    with connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT id, revision, file_path, file_hash, imported_at
-            FROM cnc_program_revisions
-            WHERE program_id=?
-            ORDER BY revision DESC
-            """,
-            (int(program_id),),
-        ).fetchall()
-        return [dict(r) for r in rows]
-
-
-def get_cnc_program_revision(revision_id: int) -> Optional[Dict[str, Any]]:
-    with connect() as conn:
-        row = conn.execute(
-            """
-            SELECT id, program_id, revision, file_path, file_hash, imported_at
-            FROM cnc_program_revisions
-            WHERE id=?
-            """,
-            (int(revision_id),),
-        ).fetchone()
-        return dict(row) if row else None
-
-
-def add_cnc_program_revision(
-    program_id: int,
-    revision: int,
-    file_path: str,
-    file_hash: str,
-) -> int:
-    with connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO cnc_program_revisions(program_id, revision, file_path, file_hash)
-            VALUES(?,?,?,?)
-            """,
-            (int(program_id), int(revision), file_path, file_hash),
-        )
-        row = conn.execute(
-            """
-            SELECT id FROM cnc_program_revisions
-            WHERE program_id=? AND revision=?
-            """,
-            (int(program_id), int(revision)),
-        ).fetchone()
-        return int(row["id"]) if row else 0
-
-
-def next_cnc_program_revision(program_id: int) -> int:
-    with connect() as conn:
-        row = conn.execute(
-            "SELECT MAX(revision) AS rev FROM cnc_program_revisions WHERE program_id=?",
-            (int(program_id),),
-        ).fetchone()
-        current = row["rev"] if row and row["rev"] is not None else 0
-        return int(current) + 1
-
-
-def latest_cnc_program_revision(program_id: int) -> Optional[Dict[str, Any]]:
-    with connect() as conn:
-        row = conn.execute(
-            """
-            SELECT id, revision, file_path, file_hash, imported_at
-            FROM cnc_program_revisions
-            WHERE program_id=?
-            ORDER BY revision DESC
-            LIMIT 1
-            """,
-            (int(program_id),),
-        ).fetchone()
-        return dict(row) if row else None
-
-
-def upsert_cnc_code_catalog(
-    program_revision_id: int,
-    code: str,
-    code_type: str,
-    count: int,
-    sample_line: int,
-) -> None:
-    with connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO cnc_code_catalog(program_revision_id, code, code_type, count, sample_line)
-            VALUES(?,?,?,?,?)
-            ON CONFLICT(program_revision_id, code, code_type) DO UPDATE SET
-              count=excluded.count,
-              sample_line=excluded.sample_line
-            """,
-            (int(program_revision_id), code, code_type, int(count), int(sample_line)),
-        )
-
-
-def list_cnc_code_catalog(program_revision_id: int) -> List[Dict[str, Any]]:
-    with connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT code, code_type, count, sample_line
-            FROM cnc_code_catalog
-            WHERE program_revision_id=?
-            ORDER BY code_type, code
-            """,
-            (int(program_revision_id),),
-        ).fetchall()
-        return [dict(r) for r in rows]
-
-
-def add_cnc_analysis_run(
-    program_revision_id: int,
-    machine_profile: str,
-    efficiency_score: float,
-    cycle_time_seconds: float,
-) -> int:
-    with connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO cnc_analysis_runs(
-                program_revision_id, machine_profile, efficiency_score, cycle_time_seconds
-            )
-            VALUES(?,?,?,?)
-            """,
-            (int(program_revision_id), machine_profile, float(efficiency_score), float(cycle_time_seconds)),
-        )
-        row = conn.execute("SELECT last_insert_rowid() AS id").fetchone()
-        return int(row["id"]) if row else 0
-
-
-def list_cnc_analysis_runs(program_revision_id: int) -> List[Dict[str, Any]]:
-    with connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT id, machine_profile, efficiency_score, cycle_time_seconds, created_at
-            FROM cnc_analysis_runs
-            WHERE program_revision_id=?
-            ORDER BY created_at DESC, id DESC
-            """,
-            (int(program_revision_id),),
-        ).fetchall()
-        return [dict(r) for r in rows]
-
-
-def add_cnc_finding(
-    analysis_run_id: int,
-    severity: str,
-    rule_id: str,
-    line_numbers: str,
-    message: str,
-    impact_seconds: float,
-) -> None:
-    with connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO cnc_findings(
-                analysis_run_id, severity, rule_id, line_numbers, message, impact_seconds
-            )
-            VALUES(?,?,?,?,?,?)
-            """,
-            (
-                int(analysis_run_id),
-                severity,
-                rule_id,
-                line_numbers,
-                message,
-                float(impact_seconds),
-            ),
-        )
-
-
-def list_cnc_findings(analysis_run_id: int) -> List[Dict[str, Any]]:
-    with connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT severity, rule_id, line_numbers, message, impact_seconds
-            FROM cnc_findings
-            WHERE analysis_run_id=?
-            ORDER BY id
-            """,
-            (int(analysis_run_id),),
-        ).fetchall()
         return [dict(r) for r in rows]
 
 

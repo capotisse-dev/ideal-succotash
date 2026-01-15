@@ -17,8 +17,6 @@ LOG_DIR = LOGS_DIR  # compat alias
 BACKUPS_DIR = str(PROJECT_ROOT / "backups")
 MACHINES_DIR = str(PROJECT_ROOT / "data" / "machines")
 PART_FILES_DIR = str(PROJECT_ROOT / "data" / "parts")
-CNC_PROGRAMS_DIR = str(PROJECT_ROOT / "data" / "cnc_programs")
-CNC_EXPORTS_DIR = str(PROJECT_ROOT / "data" / "exports" / "cnc_analyzer")
 
 # Logs
 AUDIT_LOG_FILE = str(Path(LOGS_DIR) / "audit.log")
@@ -137,7 +135,7 @@ COLUMNS = [
 # DEFAULT STORES (bootstrap expects these names) :contentReference[oaicite:7]{index=7}
 # ----------------------------
 DEFAULT_USERS = {
-    "super": {"password": "super123", "role": "Top (Super User)", "name": "Super User", "line": "Both"},
+    "super": {"password": "super", "role": "Top (Super User)", "name": "Super User", "line": "Both"},
     "admin": {"password": "admin", "role": "Admin", "name": "Admin User", "line": "Both"},
 }
 
@@ -154,6 +152,9 @@ DEFAULT_LINE_TOOL_MAP = {
         "21", "23", "25", "26", "27", "40", "60",
     ] + [str(i) for i in range(201, 216)],
 }
+DEFAULT_TOOL_CONFIG = {}
+DEFAULT_LINES = ["U725", "JL"]
+DEFAULT_DOWNTIME_CODES = []
 
 DEFAULT_DEFECT_CODES = []
 DEFAULT_ANDON_REASONS = []

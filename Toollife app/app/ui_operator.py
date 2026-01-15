@@ -55,14 +55,9 @@ class OperatorUI(tk.Frame):
         # Downtime selection
         tk.Label(body, text="Downtime Code:", **style).grid(row=4, column=0, sticky="e", pady=6)
         self.downtime_var = tk.StringVar(value="")
-        self._downtime_options = list_downtime_codes()
-        self._downtime_display = [
-            f"{c['code']} - {c.get('description', '')}".strip(" -")
-            for c in self._downtime_options
-        ]
         self.downtime_cb = ttk.Combobox(
             body,
-            values=self._downtime_display,
+            values=[c["code"] for c in list_downtime_codes()],
             textvariable=self.downtime_var,
             state="readonly",
             width=24,
@@ -115,7 +110,7 @@ class OperatorUI(tk.Frame):
             messagebox.showerror("Missing Info", "Enter the parts ran.")
             return
 
-        downtime_code = self._selected_downtime_code()
+        downtime_code = self.downtime_var.get().strip()
         dt_total = safe_float(self.dt_total_entry.get(), 0.0) if downtime_code else 0.0
         dt_occ = safe_int(self.dt_occ_entry.get(), 0) if downtime_code else 0
         dt_comments = self.dt_comment_entry.get().strip() if downtime_code else ""
@@ -141,9 +136,3 @@ class OperatorUI(tk.Frame):
         self.parts_entry.delete(0, "end")
         self.downtime_var.set("")
         self._toggle_downtime_fields()
-
-    def _selected_downtime_code(self) -> str:
-        raw = self.downtime_var.get().strip()
-        if not raw:
-            return ""
-        return raw.split(" - ", 1)[0].strip()
