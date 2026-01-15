@@ -331,6 +331,12 @@ def list_lines() -> List[str]:
         return [r["name"] for r in rows]
 
 
+def list_lines() -> List[str]:
+    with connect() as conn:
+        rows = conn.execute("SELECT name FROM lines ORDER BY name").fetchall()
+        return [r["name"] for r in rows]
+
+
 def upsert_part(part_number: str, name: str = "", lines: Optional[List[str]] = None) -> None:
     lines = lines or []
     with connect() as conn:
