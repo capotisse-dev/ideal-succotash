@@ -19,6 +19,7 @@ PERMISSIONS = {
 }
 
 ROLE_SCREEN_DEFAULTS = {
+    "Operator": {"Operator": "edit"},
     "Tool Changer": {"Tool Changer": "edit", "Action Center": "view", "Audit Trail": "view"},
     "Leader": {"Leader": "edit", "Action Center": "view", "Audit Trail": "view"},
     "Quality": {"Quality": "edit", "Action Center": "view", "Audit Trail": "view"},
@@ -28,6 +29,7 @@ ROLE_SCREEN_DEFAULTS = {
         "Notifications": "edit",
         "Action Center": "edit",
         "Tool Changer": "edit",
+        "Operator": "edit",
         "Leader": "edit",
         "Quality": "edit",
         "Gages": "edit",

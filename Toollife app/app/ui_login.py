@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from .bootstrap import ensure_app_initialized
-from .db import get_user, update_user_fields
+from .db import get_user, update_user_fields, get_meta, set_meta
 from .audit import log_audit
 from .ui_common import LIGHT, DARK
 from .permissions import screen_access as permission_screen_access, can_edit_screen as permission_can_edit_screen, ROLE_SCREEN_DEFAULTS
@@ -11,6 +11,7 @@ from .screen_registry import SCREEN_REGISTRY
 
 # Role UIs
 from .ui_toolchanger import ToolChangerUI
+from .ui_operator import OperatorUI
 from .ui_leader import LeaderUI
 from .ui_quality import QualityUI
 from .ui_top import TopUI
@@ -37,6 +38,8 @@ ROLE_ALIASES = {
     "top (super user)": "Top (Super User)",
 
     "admin": "Admin",
+
+    "operator": "Operator",
 }
 
 def normalize_role(role_value):
@@ -54,6 +57,7 @@ def normalize_role(role_value):
 # -----------------------------
 ROLE_TO_UI = {
     "Tool Changer": ToolChangerUI,
+    "Operator": OperatorUI,
     "Leader": LeaderUI,
     "Quality": QualityUI,
     "Top (Super User)": SuperUI,  # Super = "all screens console"
@@ -83,6 +87,13 @@ class App(tk.Tk):
 
         self.container = tk.Frame(self)
         self.container.pack(fill="both", expand=True)
+
+        if get_meta("shown_default_login") != "1":
+            messagebox.showinfo(
+                "Default Logins",
+                "Default logins:\n- admin / admin\n- super / super",
+            )
+            set_meta("shown_default_login", "1")
 
         self.show_login()
 
@@ -217,13 +228,7 @@ class LoginPage(tk.Frame):
             command=self.show_or_reset_password
         ).pack(side="left", padx=6)
 
-        tk.Label(
-            card,
-            text="Default logins: admin / admin  •  super / super",
-            font=("Arial", 9),
-            bg=controller.colors["header_bg"],
-            fg=controller.colors["fg"]
-        ).pack()
+
 
         # Enter key triggers login
         self.u.bind("<Return>", lambda e: self.check())
