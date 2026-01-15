@@ -261,6 +261,23 @@ def _seed_default_tools() -> None:
 
 
 def _seed_default_tools() -> None:
+    from .db import list_tools_simple, upsert_tool_inventory, set_tool_lines
+
+    if list_tools_simple():
+        return
+    for line, tools in DEFAULT_LINE_TOOL_MAP.items():
+        for tool_num in tools:
+            upsert_tool_inventory(
+                tool_num=str(tool_num),
+                name="",
+                unit_cost=0.0,
+                stock_qty=0,
+                inserts_per_tool=1,
+            )
+            set_tool_lines(str(tool_num), [line])
+
+
+def _seed_default_tools() -> None:
     if list_tools_simple():
         return
     for line, tools in DEFAULT_LINE_TOOL_MAP.items():
