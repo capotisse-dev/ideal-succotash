@@ -24,17 +24,7 @@ except Exception:
     canvas = None
     letter = None
 
-try:
-    from .config import CNC_PROGRAMS_DIR, CNC_EXPORTS_DIR
-except Exception:
-    from pathlib import Path
-
-    PROJECT_ROOT = Path(__file__).resolve().parent.parent
-    CNC_PROGRAMS_DIR = str(PROJECT_ROOT / "data" / "cnc_programs")
-    CNC_EXPORTS_DIR = str(PROJECT_ROOT / "data" / "exports" / "cnc_analyzer")
-
-os.makedirs(CNC_PROGRAMS_DIR, exist_ok=True)
-os.makedirs(CNC_EXPORTS_DIR, exist_ok=True)
+from .config import CNC_PROGRAMS_DIR, CNC_EXPORTS_DIR
 from .db import (
     list_lines,
     list_machines,
