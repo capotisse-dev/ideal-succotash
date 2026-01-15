@@ -1,0 +1,50 @@
+{
+  "severity_levels": [
+    "Low",
+    "Medium",
+    "High",
+    "Critical"
+  ],
+  "rules": {
+    "andon_always_critical": true,
+    "customer_risk_map": {
+      "Low": "Low",
+      "Med": "Medium",
+      "Medium": "Medium",
+      "High": "High",
+      "Critical": "Critical"
+    },
+    "copq_thresholds": {
+      "medium": 250.0,
+      "high": 750.0,
+      "critical": 1500.0
+    },
+    "defect_qty_thresholds": {
+      "medium": 5,
+      "high": 15,
+      "critical": 30
+    },
+    "repeat_offender_escalation": {
+      "watch_score": 50,
+      "high_score": 80,
+      "critical_score": 110
+    },
+    "overdue_action_escalation": {
+      "high_after_days_overdue": 1,
+      "critical_after_days_overdue": 3
+    },
+    "ncr_age_escalation": {
+      "high_after_days_open": 3,
+      "critical_after_days_open": 7
+    },
+    "gage_calibration_escalation": {
+      "due_soon_days": 14,
+      "overdue_criticality_map": {
+        "Low": "Medium",
+        "Medium": "High",
+        "High": "Critical",
+        "Critical": "Critical"
+      }
+    }
+  }
+}

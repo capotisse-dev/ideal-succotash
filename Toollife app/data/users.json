@@ -1,0 +1,32 @@
+{
+  "super": {
+    "password": "super",
+    "role": "Top (Super User)",
+    "line": "Both"
+  },
+  "admin": {
+    "password": "admin",
+    "role": "Admin",
+    "line": "Both"
+  },
+  "55": {
+    "password": "55",
+    "role": "Admin",
+    "line": "Both"
+  },
+  "John": {
+    "password": "144",
+    "role": "Tool Changer",
+    "name": "John"
+  },
+  "11": {
+    "password": "11",
+    "role": "Tool Changer",
+    "name": "John"
+  },
+  "77": {
+    "password": "77",
+    "role": "Leader",
+    "name": "77"
+  }
+}

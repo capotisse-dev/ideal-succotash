@@ -1,0 +1,20 @@
+{
+  "window_days": 7,
+  "part_defect_repeat_threshold": 3,
+  "machine_defect_repeat_threshold": 5,
+  "tool_copq_repeat_threshold": 3,
+  "weights": {
+    "part_defect_repeat": 40,
+    "machine_repeat": 25,
+    "tool_copq_repeat": 35,
+    "andon_flag": 40,
+    "customer_risk_high": 30,
+    "customer_risk_critical": 60
+  },
+  "score_bands": {
+    "none_max": 39,
+    "watch_min": 40,
+    "repeat_min": 80
+  },
+  "copq_event_min": 200.0
+}

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "gages": [
+    {
+      "gage_id": "G-0001",
+      "name": "Caliper - 6in",
+      "type": "Caliper",
+      "line": "Both",
+      "calibration_frequency_days": "180",
+      "last_calibration_date": "2025-05-01",
+      "criticality": "Medium",
+      "notes": "General-use caliper"
+    },
+    {
+      "gage_id": "G-0002",
+      "name": "Dial Indicator - 0.0005",
+      "type": "Indicator",
+      "line": "U725",
+      "calibration_frequency_days": 180,
+      "last_calibration_date": "2025-11-15",
+      "criticality": "High",
+      "notes": "Used for runout checks"
+    },
+    {
+      "gage_id": "G-0003",
+      "name": "Bore Gage Set",
+      "type": "Bore Gage",
+      "line": "JL",
+      "calibration_frequency_days": 90,
+      "last_calibration_date": "2025-12-20",
+      "criticality": "Critical",
+      "notes": "Critical ID verification"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "name": "Safety / 5S",
+      "items": [
+        "Work area clean and free of hazards",
+        "Proper PPE worn",
+        "Walkways clear / no trip hazards"
+      ]
+    },
+    {
+      "name": "Measurement / Gaging",
+      "items": [
+        "Gage required for check is available",
+        "Gage appears undamaged and clean",
+        "Calibration status in date (sticker or system)"
+      ]
+    },
+    {
+      "name": "Process Controls",
+      "items": [
+        "Work instruction present and followed",
+        "First-off / last-off checks being recorded",
+        "Offsets documented / verified when required"
+      ]
+    },
+    {
+      "name": "Tooling / Machine",
+      "items": [
+        "Correct tool installed for job",
+        "Coolant level/concentration acceptable (if applicable)",
+        "Chip management acceptable (no excessive build-up)"
+      ]
+    }
+  ]
+}

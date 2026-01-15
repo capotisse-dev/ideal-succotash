@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "by_type": {
+    "Caliper": [
+      "Clean jaws and beam; no debris present",
+      "Zero check passes at closed position",
+      "Slide movement smooth; no binding",
+      "No visible damage or bent jaws",
+      "Calibration sticker present and in date"
+    ],
+    "Indicator": [
+      "Tip and stem clean; no chips/debris",
+      "Needle returns to zero consistently",
+      "No excessive backlash observed",
+      "Mounting method stable (no loose mag base)",
+      "Calibration sticker present and in date"
+    ],
+    "Bore Gage": [
+      "Contacts clean and undamaged",
+      "Master/setting ring available and used",
+      "Zero set against master is stable",
+      "No excessive play in mechanism",
+      "Calibration sticker present and in date"
+    ],
+    "Other": [
+      "Tool/gage clean and undamaged",
+      "Correct method per WI available",
+      "Calibration status verified"
+    ]
+  }
+}

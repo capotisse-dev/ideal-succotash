@@ -1,0 +1,10 @@
+{
+  "downtime_cost_per_min": {
+    "U725": 25.0,
+    "JL": 18.0
+  },
+  "scrap_cost_default": 8.0,
+  "scrap_cost_by_part": {},
+  "sort_labor_cost_per_hour": 30.0,
+  "enable_sort_labor_cost": false
+}

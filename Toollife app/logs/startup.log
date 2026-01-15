@@ -1,0 +1,12 @@
+Startup failure:
+
+Traceback (most recent call last):
+  File "C:\Users\spratherjr\Desktop\Toollife app\main.py", line 40, in main
+    initialize_app()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\spratherjr\Desktop\Toollife app\app\__init__.py", line 80, in initialize_app
+    from .bootstrap import ensure_app_initialized
+  File "C:\Users\spratherjr\Desktop\Toollife app\app\bootstrap.py", line 125
+    seed_default_users(DEFAULT_USERS))
+                                     ^
+SyntaxError: unmatched ')'

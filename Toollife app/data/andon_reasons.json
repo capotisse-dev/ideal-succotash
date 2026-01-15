@@ -1,0 +1,14 @@
+[
+  "Safety Concern",
+  "Tool Break / Catastrophic Failure",
+  "Out of Spec - Dimension",
+  "Out of Spec - Surface Finish",
+  "Gage/Measurement Issue",
+  "Machine Alarm / Hard Fault",
+  "Material Issue",
+  "Fixture / Clamp Issue",
+  "Program Issue",
+  "Chip Management / Coolant Issue",
+  "Unable to Contain Defects",
+  "Other"
+]

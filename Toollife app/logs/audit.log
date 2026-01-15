@@ -1,0 +1,132 @@
+2026-01-06 02:52:05,112 - User: super | Action: Login
+2026-01-06 02:52:24,099 - User: admin | Action: Login
+2026-01-06 02:53:31,305 - User: admin | Action: Login
+2026-01-06 02:53:49,909 - User: admin | Action: Logout
+2026-01-06 02:53:57,885 - User: super | Action: Login
+2026-01-06 02:54:42,759 - User: super | Action: Login
+2026-01-06 03:03:13,009 - User: super | Action: Login
+2026-01-06 03:13:00,159 - User: super | Action: Login as Top (Super User)
+2026-01-06 03:17:14,021 - User: super | Action: Login as Top (Super User)
+2026-01-06 03:19:43,792 - User: super | Action: Login as Top (Super User)
+2026-01-06 03:22:29,349 - User: super | Action: Login as Top (Super User)
+2026-01-06 03:24:34,777 - User: super | Action: Login as Top (Super User)
+2026-01-06 08:33:03,207 - User: admin | Action: Login as Admin
+2026-01-06 08:33:27,005 - User: admin | Action: Logout
+2026-01-06 08:33:32,607 - User: super | Action: Login as Top (Super User)
+2026-01-06 08:47:33,322 - User: super | Action: Logout
+2026-01-06 08:47:42,995 - User: admin | Action: Login as Admin
+2026-01-06 09:01:12,746 - User: admin | Action: Logout
+2026-01-06 09:01:17,777 - User: super | Action: Login as Top (Super User)
+2026-01-06 09:09:45,591 - User: super | Action: Logout
+2026-01-06 09:09:48,961 - User: 55 | Action: Login as Admin
+2026-01-06 09:33:14,521 - User: super | Action: Login as Top (Super User)
+2026-01-06 09:33:46,590 - User: super | Action: Logout
+2026-01-06 09:33:50,673 - User: admin | Action: Login as Admin
+2026-01-06 09:33:52,793 - User: admin | Action: Logout
+2026-01-06 09:53:52,191 - User: super | Action: Login as Top (Super User)
+2026-01-06 11:42:17,318 - User: super | Action: Login as Top (Super User)
+2026-01-06 11:44:21,130 - User: super | Action: Login as Top (Super User)
+2026-01-06 11:48:00,744 - User: super | Action: Login as Top (Super User)
+2026-01-06 12:34:37,969 - User: super | Action: Login as Top (Super User)
+2026-01-06 12:37:43,419 - User: super | Action: Login as Top (Super User)
+2026-01-06 12:43:10,081 - User: super | Action: Logout
+2026-01-06 12:43:13,726 - User: 11 | Action: Login as Tool Changer
+2026-01-06 12:44:16,028 - User: 11 | Action: Logout
+2026-01-06 12:44:20,414 - User: super | Action: Login as Top (Super User)
+2026-01-06 12:48:04,487 - User: super | Action: Logout
+2026-01-06 12:48:07,967 - User: 11 | Action: Login as Tool Changer
+2026-01-06 12:49:26,429 - User: 11 | Action: Logout
+2026-01-06 12:49:31,706 - User: super | Action: Login as Top (Super User)
+2026-01-06 12:50:16,752 - User: super | Action: Logout
+2026-01-06 12:50:20,299 - User: 77 | Action: Login as Leader
+2026-01-06 12:50:45,906 - User: 77 | Action: Logout
+2026-01-06 12:50:51,802 - User: super | Action: Login as Top (Super User)
+2026-01-06 12:55:40,065 - User: super | Action: Logout
+2026-01-06 12:55:45,550 - User: admin | Action: Login as Admin
+2026-01-06 12:56:33,452 - User: admin | Action: Logout
+2026-01-06 12:56:42,878 - User: super | Action: Login as Top (Super User)
+2026-01-06 13:17:32,106 - User: super | Action: Login as Top (Super User)
+2026-01-06 13:38:16,315 - User: super | Action: Login as Top (Super User)
+2026-01-06 13:38:59,721 - User: super | Action: Login as Top (Super User)
+2026-01-06 13:43:18,333 - User: super | Action: Login as Top (Super User)
+2026-01-06 13:47:39,644 - User: super | Action: Login as Top (Super User)
+2026-01-06 13:52:21,868 - User: super | Action: Login as Top (Super User)
+2026-01-06 14:01:30,148 - User: super | Action: Logout
+2026-01-06 14:01:32,502 - User: 11 | Action: Login as Tool Changer
+2026-01-06 14:02:32,104 - User: 11 | Action: Logout
+2026-01-06 14:02:39,795 - User: super | Action: Login as Top (Super User)
+2026-01-06 14:07:07,777 - User: super | Action: Logout
+2026-01-06 14:07:11,751 - User: admin | Action: Login as Admin
+2026-01-06 14:08:45,972 - User: admin | Action: Logout
+2026-01-06 14:08:55,214 - User: super | Action: Login as Top (Super User)
+2026-01-06 14:12:13,552 - User: super | Action: Logout
+2026-01-06 14:12:15,522 - User: 11 | Action: Login as Tool Changer
+2026-01-06 14:13:16,044 - User: 11 | Action: Logout
+2026-01-06 14:13:22,131 - User: super | Action: Login as Top (Super User)
+2026-01-06 14:43:34,371 - User: super | Action: Logout
+2026-01-06 14:43:37,078 - User: 11 | Action: Login as Tool Changer
+2026-01-06 14:44:19,474 - User: 11 | Action: Logout
+2026-01-06 14:44:24,834 - User: super | Action: Login as Top (Super User)
+2026-01-06 14:48:44,602 - User: super | Action: Logout
+2026-01-06 14:48:46,739 - User: 11 | Action: Login as Tool Changer
+2026-01-06 14:49:09,170 - User: admin | Action: Login as Admin
+2026-01-06 14:49:25,093 - User: admin | Action: Logout
+2026-01-06 14:49:29,920 - User: super | Action: Login as Top (Super User)
+2026-01-06 14:59:17,087 - User: super | Action: Logout
+2026-01-06 14:59:19,961 - User: 11 | Action: Login as Tool Changer
+2026-01-06 15:00:35,381 - User: 11 | Action: Logout
+2026-01-06 15:00:39,889 - User: super | Action: Login as Top (Super User)
+2026-01-06 15:01:32,026 - User: super | Action: Logout
+2026-01-06 15:01:40,120 - User: super | Action: Login as Top (Super User)
+2026-01-06 15:21:10,602 - User: super | Action: Logout
+2026-01-06 15:21:13,476 - User: 11 | Action: Login as Tool Changer
+2026-01-06 15:22:02,305 - User: 11 | Action: Logout
+2026-01-06 15:22:06,889 - User: super | Action: Login as Top (Super User)
+2026-01-06 15:22:22,976 - User: super | Action: Logout
+2026-01-06 15:22:26,503 - User: 77 | Action: Login as Leader
+2026-01-06 15:22:48,566 - User: 77 | Action: Logout
+2026-01-06 15:23:00,693 - User: super | Action: Login as Top (Super User)
+2026-01-06 15:25:39,455 - User: super | Action: Logout
+2026-01-06 15:25:54,040 - User: 11 | Action: Login as Tool Changer
+2026-01-06 15:27:12,330 - User: 11 | Action: Logout
+2026-01-06 15:27:18,506 - User: super | Action: Login as Top (Super User)
+2026-01-06 17:08:56,929 - User: super | Action: Logout
+2026-01-06 17:09:01,962 - User: 11 | Action: Login as Tool Changer
+2026-01-06 17:09:59,142 - User: 11 | Action: Logout
+2026-01-06 17:10:01,661 - User: 77 | Action: Login as Leader
+2026-01-06 17:10:22,617 - User: 77 | Action: Logout
+2026-01-06 17:10:28,563 - User: super | Action: Login as Top (Super User)
+2026-01-06 17:17:46,737 - User: super | Action: Logout
+2026-01-06 17:17:49,022 - User: 11 | Action: Login as Tool Changer
+2026-01-06 17:18:45,560 - User: 11 | Action: Logout
+2026-01-06 17:18:50,649 - User: super | Action: Login as Top (Super User)
+2026-01-06 22:51:53,586 - User: super | Action: Login as Top (Super User)
+2026-01-06 23:31:33,261 - User: super | Action: Login as Top (Super User)
+2026-01-07 18:01:15,012 - User: super | Action: Login as Top (Super User)
+2026-01-07 18:01:34,570 - User: super | Action: Logout
+2026-01-07 18:01:38,064 - User: 11 | Action: Login as Tool Changer
+2026-01-07 18:01:53,323 - User: 11 | Action: Login as Tool Changer
+2026-01-07 18:04:39,953 - User: 11 | Action: Logout
+2026-01-07 18:04:42,447 - User: 77 | Action: Login as Leader
+2026-01-07 18:04:50,355 - User: 77 | Action: Logout
+2026-01-07 18:05:00,547 - User: super | Action: Login as Top (Super User)
+2026-01-14 23:41:29,754 - User: admin | Action: Login as Admin
+2026-01-14 23:41:33,600 - User: admin | Action: Logout
+2026-01-14 23:41:38,236 - User: super | Action: Login as Top (Super User)
+2026-01-15 00:26:16,338 - User: super | Action: Login as Top (Super User)
+2026-01-15 00:27:16,504 - User: super | Action: Updated part 10136014 lines/pricing
+2026-01-15 00:27:48,936 - User: super | Action: Updated part 10136014 lines/pricing
+2026-01-15 00:28:10,143 - User: super | Action: Updated part 10136014 lines/pricing
+2026-01-15 00:28:34,076 - User: super | Action: Updated part 10136015 lines/pricing
+2026-01-15 00:28:48,274 - User: super | Action: Updated part 10136014 lines/pricing
+2026-01-15 00:29:04,218 - User: super | Action: Updated part 10136014 lines/pricing
+2026-01-15 00:29:49,410 - User: super | Action: Set scrap cost for 10136014 to 37.06
+2026-01-15 00:30:16,081 - User: super | Action: Set scrap cost for 10136015 to 47.61
+2026-01-15 00:31:10,150 - User: super | Action: Tool change entry 20260115-003110-0000 saved
+2026-01-15 00:32:53,830 - User: super | Action: Tool change entry 20260115-003253-0000 saved
+2026-01-15 00:33:46,587 - User: super | Action: Leader sign entry 20260115-003253-0000
+2026-01-15 00:33:48,539 - User: super | Action: Leader sign entry 20260115-003110-0000
+2026-01-15 00:33:55,516 - User: super | Action: Quality verified entry 20260115-003253-0000
+2026-01-15 00:33:56,721 - User: super | Action: Quality verified entry 20260115-003110-0000
+2026-01-15 00:35:29,280 - User: super | Action: Logout
+2026-01-15 00:35:36,202 - User: admin | Action: Login as Admin
