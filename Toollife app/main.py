@@ -35,6 +35,9 @@ def _show_fatal_popup(title: str, text: str) -> None:
 
 def main() -> int:
     try:
+        base_dir = Path(__file__).resolve().parent
+        if str(base_dir) not in sys.path:
+            sys.path.insert(0, str(base_dir))
         # 1) Initialize app environment FIRST
         from app import initialize_app
         initialize_app()
