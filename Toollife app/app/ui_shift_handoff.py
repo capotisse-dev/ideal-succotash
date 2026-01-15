@@ -8,6 +8,7 @@ import pandas as pd
 from .ui_common import HeaderFrame
 from .storage import get_df, safe_int, safe_float
 from .config import DATA_DIR
+from .db import get_scrap_costs_simple
 
 
 def _parse_date(s):
@@ -74,13 +75,22 @@ class ShiftHandoffUI(tk.Frame):
 
         self._toggle_custom()
 
+        nb = ttk.Notebook(self)
+        nb.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.tab_summary = tk.Frame(nb, bg=controller.colors["bg"])
+        self.tab_scrap = tk.Frame(nb, bg=controller.colors["bg"])
+
+        nb.add(self.tab_summary, text="Summary")
+        nb.add(self.tab_scrap, text="Scrap Cost")
+
         # Summary text
-        self.summary = tk.Text(self, height=14, wrap="word")
+        self.summary = tk.Text(self.tab_summary, height=14, wrap="word")
         self.summary.pack(fill="x", padx=10, pady=(0, 10))
 
         # Tables
         cols = ("rank", "key", "count", "defect_qty", "downtime_mins", "copq_est")
-        self.tree = ttk.Treeview(self, columns=cols, show="headings", height=14)
+        self.tree = ttk.Treeview(self.tab_summary, columns=cols, show="headings", height=14)
         for c in cols:
             self.tree.heading(c, text=c.upper())
             if c == "key":
@@ -88,6 +98,9 @@ class ShiftHandoffUI(tk.Frame):
             else:
                 self.tree.column(c, width=120)
         self.tree.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+
+        self.scrap_canvas = tk.Canvas(self.tab_scrap, bg="white", height=360)
+        self.scrap_canvas.pack(fill="both", expand=True, padx=10, pady=10)
 
         # cache last generated
         self._last_df = None
@@ -169,6 +182,10 @@ class ShiftHandoffUI(tk.Frame):
         if "COPQ_Est" in sub.columns:
             copq_total = sub["COPQ_Est"].apply(lambda x: safe_float(x, 0.0)).sum()
 
+        scrap_costs = get_scrap_costs_simple()
+        sub["_scrap_cost"] = sub.get("Part_Number", "").map(scrap_costs).fillna(0.0) * sub["_defect_qty"]
+        scrap_total = float(sub["_scrap_cost"].sum())
+
         # Open actions
         open_actions = sub.get("Action_Status", "").isin(["Open", "Overdue"]).sum() if "Action_Status" in sub.columns else 0
 
@@ -183,6 +200,7 @@ class ShiftHandoffUI(tk.Frame):
         self.summary.insert(tk.END, f"High/Critical risk entries: {risk_high}\n")
         self.summary.insert(tk.END, f"Open/Overdue actions (rows): {open_actions}\n")
         self.summary.insert(tk.END, f"Total COPQ estimate: ${copq_total:,.2f}\n\n")
+        self.summary.insert(tk.END, f"Total scrap cost: ${scrap_total:,.2f}\n\n")
 
         self.summary.insert(tk.END, "Top offenders table below = combined score by count/defects/downtime/COPQ.\n")
 
@@ -238,6 +256,54 @@ class ShiftHandoffUI(tk.Frame):
                 float(r["downtime_mins"]),
                 float(r["copq_est"])
             ))
+
+        self._update_scrap_chart(sub, start, end)
+
+    def _update_scrap_chart(self, df: pd.DataFrame, start: datetime, end: datetime):
+        self.scrap_canvas.delete("all")
+        if df.empty:
+            self.scrap_canvas.create_text(10, 10, anchor="nw", text="No scrap data in range.")
+            return
+
+        days = max(1, (end.date() - start.date()).days + 1)
+        if days > 31:
+            df["_bucket"] = df["_dt"].dt.to_period("W").apply(lambda p: p.start_time.strftime("%Y-%m-%d"))
+            label = "Week Starting"
+        else:
+            df["_bucket"] = df["_dt"].dt.strftime("%Y-%m-%d")
+            label = "Date"
+
+        out = df.groupby("_bucket", dropna=False).agg(scrap_cost=("_scrap_cost", "sum")).reset_index()
+        out = out.sort_values("_bucket").reset_index(drop=True)
+        if out.empty:
+            self.scrap_canvas.create_text(10, 10, anchor="nw", text="No scrap costs recorded.")
+            return
+
+        width = max(640, self.scrap_canvas.winfo_width() or 640)
+        height = max(300, self.scrap_canvas.winfo_height() or 300)
+        padding = 60
+        chart_w = width - padding * 2
+        chart_h = height - padding * 2
+
+        max_val = max(out["scrap_cost"].max(), 1.0)
+        bar_w = max(6, chart_w / max(len(out), 1))
+        x = padding
+
+        self.scrap_canvas.create_text(padding, 10, anchor="nw", text=f"Scrap Cost by {label}")
+
+        for _, row in out.iterrows():
+            val = float(row["scrap_cost"])
+            bar_h = (val / max_val) * chart_h
+            self.scrap_canvas.create_rectangle(
+                x,
+                padding + chart_h - bar_h,
+                x + bar_w * 0.8,
+                padding + chart_h,
+                fill="#4c78a8",
+                outline=""
+            )
+            self.scrap_canvas.create_text(x + bar_w * 0.4, padding + chart_h + 8, anchor="n", text=row["_bucket"], angle=45)
+            x += bar_w
 
     def export(self):
         if self._last_df is None or self._last_summary_rows is None:

@@ -15,6 +15,7 @@ from .db import (
     delete_screen_permission,
 )
 from .permissions import ROLE_SCREEN_DEFAULTS
+from .screen_registry import SCREEN_REGISTRY
 from .audit import log_audit
 
 
@@ -325,7 +326,10 @@ class AdminUI(tk.Frame):
             bg=self.controller.colors["bg"],
             fg=self.controller.colors["fg"],
         ).pack(side="left")
-        self.screen_options = sorted({screen for screens in ROLE_SCREEN_DEFAULTS.values() for screen in screens})
+        self.screen_options = sorted(
+            screen for screen in SCREEN_REGISTRY.keys()
+            if self.controller.screen_access(screen) != "none"
+        )
         self.access_screen_combo = ttk.Combobox(
             row_screen,
             textvariable=self.access_screen,
