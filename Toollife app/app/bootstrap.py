@@ -8,7 +8,8 @@ from datetime import datetime
 import pandas as pd
 
 from .config import (
-    DATA_DIR, LOGS_DIR, BACKUPS_DIR, MACHINES_DIR, PART_FILES_DIR,
+    DATA_DIR, LOGS_DIR, BACKUPS_DIR, MACHINES_DIR, PART_FILES_DIR, CNC_PROGRAMS_DIR,
+    CNC_EXPORTS_DIR,
     USERS_FILE, REASONS_FILE, PARTS_FILE, TOOL_CONFIG_FILE,
     DEFECT_CODES_FILE, ANDON_REASONS_FILE, COST_CONFIG_FILE, RISK_CONFIG_FILE,
     REPEAT_RULES_FILE, LPA_CHECKLIST_FILE, GAGES_FILE, GAGE_VERIFICATION_Q_FILE,
@@ -51,6 +52,8 @@ def _ensure_dirs() -> None:
     os.makedirs(BACKUPS_DIR, exist_ok=True)
     os.makedirs(MACHINES_DIR, exist_ok=True)
     os.makedirs(PART_FILES_DIR, exist_ok=True)
+    os.makedirs(CNC_PROGRAMS_DIR, exist_ok=True)
+    os.makedirs(CNC_EXPORTS_DIR, exist_ok=True)
 
 
 def _ensure_json_files() -> None:
