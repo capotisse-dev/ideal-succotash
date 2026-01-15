@@ -81,7 +81,9 @@ class RepeatOffendersUI(tk.Frame):
         self.refresh()
 
     def _make_tree(self, parent, cols):
-        tree = ttk.Treeview(parent, columns=cols, show="headings")
+        wrap = tk.Frame(parent)
+        wrap.pack(fill="both", expand=True, padx=8, pady=8)
+        tree = ttk.Treeview(wrap, columns=cols, show="headings")
         for c in cols:
             tree.heading(c, text=c.upper())
             if c in ("part", "defect", "machine", "tool"):
@@ -90,7 +92,12 @@ class RepeatOffendersUI(tk.Frame):
                 tree.column(c, width=60)
             else:
                 tree.column(c, width=140)
-        tree.pack(fill="both", expand=True, padx=8, pady=8)
+        tree.pack(side="left", fill="both", expand=True)
+        ybar = ttk.Scrollbar(wrap, orient="vertical", command=tree.yview)
+        ybar.pack(side="right", fill="y")
+        xbar = ttk.Scrollbar(parent, orient="horizontal", command=tree.xview)
+        xbar.pack(fill="x", padx=8)
+        tree.configure(yscrollcommand=ybar.set, xscrollcommand=xbar.set)
         return tree
 
     def _clear_tree(self, tree):
