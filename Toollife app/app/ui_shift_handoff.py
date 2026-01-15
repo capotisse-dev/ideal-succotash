@@ -163,10 +163,14 @@ class ShiftHandoffUI(tk.Frame):
 
         self._last_df = sub
 
+        # Normalize numeric fields
+        sub["_defect_qty"] = sub.get("Defect_Qty", 0).apply(lambda x: safe_int(x, 0))
+        sub["_dtmins"] = sub.get("Downtime_Mins", 0).apply(lambda x: safe_float(x, 0.0))
+
         # Metrics
         total_entries = len(sub)
-        total_downtime = sub.get("Downtime_Mins", pd.Series([])).apply(lambda x: safe_float(x, 0.0)).sum()
-        total_defects = sub.get("Defect_Qty", pd.Series([])).apply(lambda x: safe_int(x, 0)).sum()
+        total_downtime = sub["_dtmins"].sum()
+        total_defects = sub["_defect_qty"].sum()
 
         # Tool changes: assume every row is a tool change entry
         tool_changes = total_entries
