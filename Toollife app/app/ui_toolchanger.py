@@ -8,7 +8,7 @@ from .ui_audit import AuditTrailUI
 from .screen_registry import get_screen_class
 from .storage import next_id, safe_int, safe_float, load_json, parts_for_line
 from .config import REASONS_FILE
-from .db import get_tool, update_tool_stock, upsert_tool_entry
+from .db import get_tool, update_tool_stock, upsert_tool_entry, list_tools_for_line, list_tool_inserts
 from .audit import log_audit
 
 class ToolChangerUI(tk.Frame):
@@ -156,18 +156,19 @@ class ToolChangerUI(tk.Frame):
         if not machine:
             return
 
-        tools = []
-        if line == "U725":
-            tools = [str(i) for i in range(1, 24)] + ["60"]
-        elif line == "JL":
-            if machine.startswith("Machine"):
-                num = int(machine.split(" ")[1])
-                if 1 <= num <= 4:
-                    tools = ["2", "4", "5", "9", "10", "11", "15", "16", "25", "26", "40"]
-                elif 5 <= num <= 8:
-                    tools = ["2", "5", "6", "10", "11", "16", "21", "23", "25", "26", "27", "40"]
-            elif machine.startswith("FF"):
-                tools = [str(i) for i in range(201, 216)] + ["60"]
+        tools = list_tools_for_line(line, include_unassigned=True)
+        if not tools:
+            if line == "U725":
+                tools = [str(i) for i in range(1, 24)] + ["60"]
+            elif line == "JL":
+                if machine.startswith("Machine"):
+                    num = int(machine.split(" ")[1])
+                    if 1 <= num <= 4:
+                        tools = ["2", "4", "5", "9", "10", "11", "15", "16", "25", "26", "40"]
+                    elif 5 <= num <= 8:
+                        tools = ["2", "5", "6", "10", "11", "16", "21", "23", "25", "26", "27", "40"]
+                elif machine.startswith("FF"):
+                    tools = [str(i) for i in range(201, 216)] + ["60"]
 
         try:
             tools.sort(key=int)
@@ -209,8 +210,15 @@ class ToolChangerUI(tk.Frame):
 
         # Inventory decrement (if configured)
         info = get_tool(tool_num)
+        inserts = list_tool_inserts(tool_num)
+        if inserts:
+            base_cost, expected_life = self._calculate_insert_cost(inserts)
+            cost = base_cost
+            if tool_life > 0 and expected_life > 0:
+                cost = base_cost * (expected_life / tool_life)
         if info:
-            cost = safe_float(info.get("unit_cost", 0), 0.0)
+            if not inserts:
+                cost = safe_float(info.get("unit_cost", 0), 0.0)
             stock = safe_int(info.get("stock_qty", 0), 0)
             if stock <= 0:
                 if not messagebox.askyesno("Stock Warning", f"Tool {tool_num} is out of stock! Submit anyway?"):
@@ -265,3 +273,20 @@ class ToolChangerUI(tk.Frame):
         self.defect_reason.delete(0, "end")
         self.life_entry.delete(0, "end"); self.life_entry.insert(0, "0")
         self.update_stock_display()
+
+    def _calculate_insert_cost(self, inserts):
+        total = 0.0
+        life_total = 0.0
+        life_count = 0
+        for ins in inserts:
+            count = safe_float(ins.get("insert_count", 0), 0.0)
+            price = safe_float(ins.get("price_per_insert", 0), 0.0)
+            life = safe_float(ins.get("tool_life", 0), 0.0)
+            sides = safe_float(ins.get("sides_per_insert", 1), 1.0)
+            if life <= 0 or sides <= 0:
+                continue
+            total += ((count * price) / life) / sides
+            life_total += life
+            life_count += 1
+        expected_life = (life_total / life_count) if life_count else 0.0
+        return total, expected_life
