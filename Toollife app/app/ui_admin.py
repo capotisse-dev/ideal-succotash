@@ -4,6 +4,7 @@ from tkinter import ttk, messagebox
 
 from .ui_common import HeaderFrame
 from .ui_action_center import ActionCenterUI
+from .ui_cnc_analyzer import CNCAnalyzerUI
 from .ui_audit import AuditTrailUI
 from .db import (
     list_users,
@@ -53,11 +54,13 @@ class AdminUI(tk.Frame):
         tab_actions = tk.Frame(nb, bg=controller.colors["bg"])
         tab_access = tk.Frame(nb, bg=controller.colors["bg"])
         tab_audit = tk.Frame(nb, bg=controller.colors["bg"])
+        tab_cnc = tk.Frame(nb, bg=controller.colors["bg"])
 
         nb.add(tab_users, text="User Management")
         nb.add(tab_actions, text="Action Center")
         nb.add(tab_access, text="Screen Access")
         nb.add(tab_audit, text="Audit Trail")
+        nb.add(tab_cnc, text="CNC Analyzer")
 
         self._build_user_management(tab_users)
         # Action Center: no extra header inside tab
@@ -70,6 +73,10 @@ class AdminUI(tk.Frame):
             AuditTrailUI(tab_audit, controller, show_header=False).pack(fill="both", expand=True)
         except TypeError:
             AuditTrailUI(tab_audit, controller).pack(fill="both", expand=True)
+        try:
+            CNCAnalyzerUI(tab_cnc, controller, show_header=False).pack(fill="both", expand=True)
+        except TypeError:
+            CNCAnalyzerUI(tab_cnc, controller).pack(fill="both", expand=True)
 
     # -------------------------
     def _build_user_management(self, parent):
