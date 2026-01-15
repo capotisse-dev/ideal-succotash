@@ -12,15 +12,19 @@ from typing import Dict, List, Tuple
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-import openpyxl
+try:
+    import openpyxl
+except Exception:
+    openpyxl = None
 
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+try:
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+except Exception:
+    canvas = None
+    letter = None
 
 from .config import CNC_PROGRAMS_DIR, CNC_EXPORTS_DIR
-
-os.makedirs(CNC_PROGRAMS_DIR, exist_ok=True)
-os.makedirs(CNC_EXPORTS_DIR, exist_ok=True)
 from .db import (
     list_lines,
     list_machines,
@@ -467,6 +471,9 @@ class CNCAnalyzerUI(tk.Frame):
         self.export_status.pack(anchor="w", pady=10)
 
     def export_excel(self):
+        if openpyxl is None:
+            messagebox.showerror("Missing Dependency", "openpyxl is not available.")
+            return
         path = os.path.join(CNC_EXPORTS_DIR, f"cnc_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx")
         wb = openpyxl.Workbook()
         ws = wb.active
@@ -493,6 +500,9 @@ class CNCAnalyzerUI(tk.Frame):
         self.export_status.config(text=f"Saved Excel: {path}")
 
     def export_pdf(self):
+        if canvas is None or letter is None:
+            messagebox.showerror("Missing Dependency", "reportlab is not available.")
+            return
         path = os.path.join(CNC_EXPORTS_DIR, f"cnc_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf")
         c = canvas.Canvas(path, pagesize=letter)
         width, height = letter
